@@ -25,6 +25,7 @@
 // - n3 unknown node (will not broadcast location points)
 
 
+
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("UdpEchoExample");
@@ -61,6 +62,12 @@ int main(int argc, char *argv[])  {
     NS_LOG_INFO ("Create nodes.");
     NodeContainer n;
     n.Create (4);
+
+    // 
+    // Create point to point topology for all 4 nodes
+    // 
+    NodeContainer p2pTopology;
+    p2pTopology.Create(4);
 
     InternetStackHelper internet;
     internet.Install (n);
@@ -137,6 +144,8 @@ int main(int argc, char *argv[])  {
     AsciiTraceHelper ascii;
     csma.EnableAsciiAll (ascii.CreateFileStream ("udp-echo.tr"));
     csma.EnablePcapAll ("udp-echo", false);
+
+    // have anchor nodes send each other message and coordinates
 
     //
     // Now, do the actual simulation.

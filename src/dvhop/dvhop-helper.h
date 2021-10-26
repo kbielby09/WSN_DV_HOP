@@ -5,7 +5,6 @@
 #include <tuple>
 
 namespace ns3{
-    namespace dvhop{
         class DVHopHelper : public UdpEchoClientHelper
         {
         public:
@@ -22,13 +21,16 @@ namespace ns3{
             // Gets location status of node
             bool GetLocationStatus();
 
+            // trilaterates node in topology
+
+
             // provide
         private: 
-            //
-            bool positionKnown = false; 
-            double mPositionX = 0;
-            double mPositionY = 0;
+            
+            bool positionKnown = false;        // boolean variable used to set if anchor node
+            double mPositionX = 0;             // x value of grid poisition of node
+            double mPositionY = 0;             // y value of grid position of node
+            double mAverageHopDistance = 5.7;  // The average hop size of the given node. 
         };
-    }
     
 }

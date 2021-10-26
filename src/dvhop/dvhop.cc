@@ -8,6 +8,8 @@
 #include "ns3/csma-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/internet-module.h"
+#include "dvhop-helper.h"
+#include <iostream>
 
 // additional libraries
 
@@ -31,7 +33,7 @@ using namespace ns3;
 NS_LOG_COMPONENT_DEFINE ("UdpEchoExample");
 
 
-int dvhop(); //prototype function for dvhop
+// int dvhop(); //prototype function for dvhop
 
 int main(int argc, char *argv[])  {
 
@@ -127,6 +129,16 @@ int main(int argc, char *argv[])  {
     apps = client.Install (n.Get (0));
     apps.Start (Seconds (2.0));
     apps.Stop (Seconds (10.0));
+
+    DVHopHelper dvhoper(2);
+    // dvhop test
+    int x = 25;
+    int y =25;
+
+    x = dvhoper.GetXPosition();
+    y = dvhoper.GetYPosition();
+
+    std::cout << "X: " << x << " Y: " << y << std::endl;
 
     #if 0
         //

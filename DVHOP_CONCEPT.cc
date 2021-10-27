@@ -7,6 +7,8 @@
 #include <vector>
 #include <cmath>
 
+// compile and run this example using the following terminal command: gcc DVHOP_CONCEPT.cc -lstdc++ -lm -lc -o test.o && ./test.o 
+
 std::pair<double, double> nodes [3];
 double avgHopSize = 10.5;
 

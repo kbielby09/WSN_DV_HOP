@@ -3,8 +3,8 @@
 
 namespace ns3 {
         // Constructor for dv hop algorithm
-        DVHopHelper::DVHopHelper(int port) {
-            std::cout << "Created DVHopHelper" std::endl;
+        DVHopHelper::DVHopHelper(Address addr, uint16_t port) {
+            std::cout << "Created DVHopHelper" << std::endl;
             // Initialize node parameters
             positionKnown = false; 
             mPositionX = 0;

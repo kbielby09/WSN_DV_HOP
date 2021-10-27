@@ -9,7 +9,7 @@ namespace ns3{
         {
         public:
             // Constructor for dv hop algorithm
-            DVHopHelper(int port);
+            DVHopHelper(Address addr, uint16_t port);
 
             // sets position of node
             void SetPosition(double x, double y);

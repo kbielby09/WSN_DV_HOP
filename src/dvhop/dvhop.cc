@@ -8,6 +8,8 @@
 #include "ns3/csma-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/internet-module.h"
+
+// libraries included by designer
 #include "dvhop-helper.h"
 #include <iostream>
 
@@ -130,7 +132,7 @@ int main(int argc, char *argv[])  {
     apps.Start (Seconds (2.0));
     apps.Stop (Seconds (10.0));
 
-    DVHopHelper dvhoper(2);
+    DVHopHelper dvhoper(serverAddress, 2);
     // dvhop test
     int x = 25;
     int y =25;

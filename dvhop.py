@@ -16,13 +16,8 @@ class Node:
         self.localizedPosition = (0, 0)
         self.DistanceTable = {}
 
-        print("Initializing")
-
-    def addBeaconPosition(self, beaconPosition, beaconName):
-        print("adding Beacon")
-
-    # def trilaterate(self):
-    #     if not(self.)
+    def trilaterate(self, point1, point2, point3, r1, r2, r3):
+        print("TODO")
 
     def getName(self):
         return self.nodeName
@@ -63,8 +58,15 @@ class Node:
         # display distance table test
         print(self.getName(), " distance table: ", self.DistanceTable)
 
+        keyList = list(self.DistanceTable.keys())
 
-        # self.trilaterate()
+        if len(keyList) >= 3:
+            self.trilaterate(self.DistanceTable[keyList[0]] [0], 
+                             self.DistanceTable[keyList[1]] [0], 
+                             self.DistanceTable[keyList[2]] [0], 
+                             self.DistanceTable[keyList[0]] [1] * averageHopSize,
+                             self.DistanceTable[keyList[1]] [1] * averageHopSize,
+                             self.DistanceTable[keyList[2]] [1] * averageHopSize)
 
 
 def find(vector,value,operator):
@@ -132,10 +134,6 @@ if __name__ == "__main__":
                         SendNode.sendHopMessage(ReceiveNode, beaconName, beaconPosition, hopCount)
                         SendNode = ReceiveNode
             
-        else:
-            # send hop message 
-            print("TODO")
-
 
     # check node List
     # for Node in NodeList:

@@ -31,8 +31,8 @@ class Node:
         yAverage = (self.localizedPosition[1] + self.Position[1]) / 2
         xDifference = abs(self.localizedPosition[0] - self.Position[0])
         yDifference = abs(self.localizedPosition[1] - self.Position[1])
-        xError      = xDifference / xAverage
-        yError      = yDifference / yAverage
+        xError      = abs((xDifference / xAverage) * 100)
+        yError      = abs((yDifference / yAverage) * 100)
         self.localizationError = (xError, yError) 
     
         print(self.nodeName, " localizaiton error: ", self.localizationError)
@@ -75,7 +75,7 @@ class Node:
 
         keyList = list(self.DistanceTable.keys())
 
-        if len(keyList) >= 3:
+        if len(keyList) >= 3 and not(self.getBeacon()):
             point1 = point(self.DistanceTable[keyList[0]] [0] [0], self.DistanceTable[keyList[0]] [0] [1])
             point2 = point(self.DistanceTable[keyList[1]] [0] [0], self.DistanceTable[keyList[1]] [0] [1])
             point3 = point(self.DistanceTable[keyList[2]] [0] [0], self.DistanceTable[keyList[2]] [0] [1])
@@ -150,54 +150,47 @@ def trilaterate(point1, point2, point3, r1, r2, r3):
     
 
 if __name__ == "__main__":
-    NodeList = []
+    
     numNodes = 100
     numBeacons = 10
 
-    # r1 = 4
-    # r2 = 3
-    # r3 = 3.25
-    # point1 = point(4,4)
-    # point2 = point(9, 7)
-    # point3 = point(9, 1)
-    # finalPose = trilaterate(point1, point2, point3, r1,r2,r3)
-    # print("Final x position: " + str(finalPose.x))
-    # print("Final y position: " + str(finalPose.y))
+    for numBeacons in range(10, 80, 10):
+        print("Localizing with ", numBeacons, " beacons in WSN")
+        NodeList = []
 
-    # for numBeacons in range(10, 100, 10):
-    # create 100 nodes with random positions in 100x100 grid
-    for i in range(0, 100): 
-        nodeName = "node " + str(i) 
-        xPos = random.randint(1, 100)
-        yPos = random.randint(1, 100)
+        # create 100 nodes with random positions in 100x100 grid
+        for i in range(0, 100): 
+            nodeName = "node " + str(i) 
+            xPos = random.randint(1, 100)
+            yPos = random.randint(1, 100)
 
-        NodeList.append(Node(xPos, yPos, nodeName))
+            NodeList.append(Node(xPos, yPos, nodeName))
 
-    # generate 10 random beacons for nodes
-    for i in range(0, numBeacons):
-        randomIndex = random.randint(0, len(NodeList))  # get random index of node list
+        # generate 10 random beacons for nodes
+        for i in range(0, numBeacons):
+            randomIndex = random.randint(0, len(NodeList) - 1)  # get random index of node list
 
-        NodeList[randomIndex].setAsBeacon()
+            NodeList[randomIndex].setAsBeacon()
 
-    # perform dvhop starting with beacon nodes
-    for SendNode in NodeList:
-        hopCount = 0
+        # perform dvhop starting with beacon nodes
+        for SendNode in NodeList:
+            hopCount = 0
 
-        # check if node is beacon
-        if SendNode.getBeacon():
-            beaconName     = SendNode.getName()
-            beaconPosition = SendNode.getPosition()
-            # send hop message to all nodes in network
-            for ReceiveNode in NodeList:
-                if SendNode.getName() == ReceiveNode.getName():
-                    continue
-                else:
-                    # send message to all nodes in network
-                    
-                    if NodeInRange(SendNode, ReceiveNode):
-                        hopCount += 1
-                        SendNode.sendHopMessage(ReceiveNode, beaconName, beaconPosition, hopCount)
-                        SendNode = ReceiveNode
+            # check if node is beacon
+            if SendNode.getBeacon():
+                beaconName     = SendNode.getName()
+                beaconPosition = SendNode.getPosition()
+                # send hop message to all nodes in network
+                for ReceiveNode in NodeList:
+                    if SendNode.getName() == ReceiveNode.getName():
+                        continue
+                    else:
+                        # send message to all nodes in network
+                        
+                        if NodeInRange(SendNode, ReceiveNode):
+                            hopCount += 1
+                            SendNode.sendHopMessage(ReceiveNode, beaconName, beaconPosition, hopCount)
+                            SendNode = ReceiveNode
             
 
     # check node List

@@ -20,6 +20,7 @@ class Node:
         self.nodeName = name
         self.localizedPosition = (0, 0)
         self.DistanceTable = {}
+        self.localizationAccuracy = 0
 
     def getName(self):
         return self.nodeName

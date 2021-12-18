@@ -33,8 +33,8 @@ class Node:
         yDifference = abs(self.localizedPosition[1] - self.Position[1])
         xError      = abs((xDifference / xAverage) * 100)
         yError      = abs((yDifference / yAverage) * 100)
-        self.localizationError = (xError, yError) 
-    
+        self.localizationError = (xError, yError)
+
         print(self.nodeName, " localizaiton error: ", self.localizationError)
 
     def getPosition(self):
@@ -62,7 +62,7 @@ class Node:
         print(self.getName(), " sending hop message")
 
         Node.receiveHopMessage(beaconName, beaconPosition, hopCount)
-    
+
 
     def receiveHopMessage(self, nodeName, position, hopCount):
         print(self.getName(), " receiving hop message from ", nodeName)
@@ -79,19 +79,22 @@ class Node:
             point1 = point(self.DistanceTable[keyList[0]] [0] [0], self.DistanceTable[keyList[0]] [0] [1])
             point2 = point(self.DistanceTable[keyList[1]] [0] [0], self.DistanceTable[keyList[1]] [0] [1])
             point3 = point(self.DistanceTable[keyList[2]] [0] [0], self.DistanceTable[keyList[2]] [0] [1])
-            result = trilaterate(point1, 
+            result = trilaterate(point1,
                              point2,
-                             point3, 
+                             point3,
                              self.DistanceTable[keyList[0]] [1] * averageHopSize,
                              self.DistanceTable[keyList[1]] [1] * averageHopSize,
                              self.DistanceTable[keyList[2]] [1] * averageHopSize)
 
-            self.localizedPosition = (result.x, result.y) 
+            self.localizedPosition = (result.x, result.y)
 
             print(self.nodeName, " localized position: ", self.localizedPosition, " actual position: ", self.Position)
 
             self.calculateLocalizationError()
 
+    def resetHopData(self):
+        self.localizedPosition = (0, 0)
+        self.DistanceTable = {}
 
 def find(vector,value,operator):
     indicies = [] 
@@ -193,98 +196,113 @@ if __name__ == "__main__":
                             SendNode = ReceiveNode
             
 
-    # check node List
-    # for Node in NodeList:
-    #     print("Node: ", Node.getName(), " Position: ", Node.getPosition()[0], " ", Node.getPosition()[1], " is Beacon: ", Node.getBeacon())
+        numContaminations = 1
+        contaminationList = []
+        for i in range(0,numContaminations):
 
-    # numContaminations = 1
-    # contaminationList = []
-    # for i in range(0,numContaminations):
+            nodeName = "Contamination 1" + str(i)
+            xPos = random.randint(1, 100)
+            yPos = random.randint(1, 100)
 
-    #     nodeName = "Contamination 1" + str(i)
-    #     xPos = random.randint(1, 100)
-    #     yPos = random.randint(1, 100)
+            contNode = Node(xPos, yPos, nodeName)
+            contNode.setAsContamination()
 
-    #     contNode = Node(xPos, yPos, nodeName)
-    #     contNode.setAsContamination()
+            contaminationList.append(contNode)
 
-    #     contaminationList.append(contNode)
+        # check node List
+        for node in contaminationList:
+            print("Node: ", node.getName(), " Position: ", node.getPosition()[0], " ", node.getPosition()[1], " is Beacon: ", node.getBeacon()," is Contamination: ", node.getContamination())
 
-    # # check node List
-    # for Node in contaminationList:
-    #     print("Node: ", Node.getName(), " Position: ", Node.getPosition()[0], " ", Node.getPosition()[1], " is Beacon: ", Node.getBeacon()," is Contamination: ", Node.getContamination())
+        # Create Wienbull PDF #
+        alpha = 5.40347  # Parameter alpha
+        beta = 1.57327  # Parameter beta
+        delta = 0.01  # The amount of change
+        d = numpy.arange(0,3,delta)  # dose
+        # Compute pdf
+        f = [0] * len(d)
+        for i in range(0,len(d)):
+            f[i] = alpha * pow(1/beta,alpha) * pow(d[i],(alpha - 1)) * math.exp(-1*pow((d[i] / beta),alpha))
+        # Create Wienbull PDF #
 
-    # # Create Wienbull PDF #
-    # alpha = 5.40347  # Parameter alpha
-    # beta = 1.57327  # Parameter beta
-    # delta = 0.01  # The amount of change
-    # d = numpy.arange(0,3,delta)  # dose
-    # # Compute pdf
-    # f = [0] * len(d) 
-    # for i in range(0,len(d)):
-    #     f[i] = alpha * pow(1/beta,alpha) * pow(d[i],(alpha - 1)) * math.exp(-1*pow((d[i] / beta),alpha)) 
-    # # Create Wienbull PDF #
+        nodeRadDist = [0.0]*numNodes
+        iter = 0
+        for node in NodeList:
+            xPos,yPos = node.getPosition()
+            contXPos,contYPos = contaminationList[0].getPosition()
+            # Calculate radius to radiation source from each node
+            nodeRadDist[iter] = math.sqrt(pow((xPos - contXPos),2) + pow((yPos - contYPos),2))
+            if(nodeRadDist[iter] == 0):
+                nodeRadDist[iter] = 0.01
+            iter += 1
 
-    # nodeRadDist = [0.0]*numNodes
-    # iter = 0
-    # for Node in NodeList:
-    #     xPos,yPos = Node.getPosition()
-    #     contXPos,contYPos = contaminationList[0].getPosition()
-    #     # Calculate radius to radiation source from each node
-    #     nodeRadDist[iter] = math.sqrt(pow((xPos - contXPos),2) + pow((yPos - contYPos),2)) 
-    #     if(nodeRadDist[iter] == 0):
-    #         nodeRadDist[iter] = 0.01
-    #     iter += 1
+        # Establish the node rate and a vector for the cumulative radiation does
+        # and node status (0 -> alive, 1 -> dead
+        doseRate = numpy.divide(2*1e-2,numpy.square(nodeRadDist))
+        doseTotal = [0.0] * numNodes
+        nodeStatus = [0] * numNodes
+        iter = 0
+        for node in NodeList:
+            if node.getDead():
+                nodeStatus[iter] = 1
+            else:
+                nodeStatus[iter] = 0
+            iter += 1
 
-    # # Establish the node rate and a vector for the cumulative radiation does
-    # # and node status (0 -> alive, 1 -> dead
-    # doseRate = numpy.divide(2*1e-2,numpy.square(nodeRadDist)) 
-    # doseTotal = [0.0] * numNodes 
-    # nodeStatus = [0] * numNodes 
-    # iter = 0
-    # for Node in NodeList:
-    #     if Node.getDead():
-    #         nodeStatus[iter] = 1 
-    #     else:
-    #         nodeStatus[iter] = 0 
-    #     iter += 1
+        # Sample the status of nodes every update rate
+        updateRate = 5000
+        simulationTime = 14 * 3600
+        for t in range(0,simulationTime,updateRate):
+            for node in NodeList:
+                node.resetHopData()
+            # Check all living nodes
+            for i in find(nodeStatus,1,"l"):
+                # Calculate total dosage received
+                dExp = int(min(round(doseTotal[i]*100),len(f)))
+                # Integrate over Weibull pdf for cumulative probability of node
+                # death
+                cumulativeProbDead = sum(f[0:dExp + 1])*delta
+                # Flip a weighted coin based on weibull cdf for death
+                if(cumulativeProbDead > numpy.random.uniform(0,1)):
+                    nodeStatus[i] = 1
+                    NodeList[i].setAsDead()
+            # Add to the dose totl for the next iteration
+            doseTotal = numpy.add(doseTotal,numpy.multiply(updateRate,doseRate))
 
-    # # Sample the status of nodes every update rate
-    # updateRate = 1 
-    # simulationTime = 14 * 3600 
-    # for t in range(0,simulationTime,updateRate):
-    #     # Check all living nodes
-    #     for i in find(nodeStatus,1,"l"):
-    #         # Calculate total dosage received
-    #         dExp = int(min(round(doseTotal[i]*100),len(f))) 
-    #         # Integrate over Weibull pdf for cumulative probability of node
-    #         # death
-    #         cumulativeProbDead = sum(f[0:dExp + 1])*delta 
-    #         # Flip a weighted coin based on weibull cdf for death
-    #         if(cumulativeProbDead > numpy.random.uniform(0,1)):
-    #             nodeStatus[i] = 1 
-    #             NodeList[i].setAsDead()
-    #     # Add to the dose totl for the next iteration
-    #     doseTotal = numpy.add(doseTotal,numpy.multiply(updateRate,doseRate)) 
-    #     plt.cla()
-    #     for Node in NodeList:
-    #         xPos,yPos = Node.getPosition()
-    #         if Node.getDead():
-    #             sym = 'x'
-    #             color = 'k'
-    #         elif Node.getBeacon():
-    #             sym = '*'
-    #             color = 'b'
-    #         else:
-    #             sym = 'o'
-    #             color = 'g'
-    #         plt.scatter(xPos,yPos,marker = sym,color=color) 
-    #     for contam in contaminationList:
-    #         xPos,yPos = contam.getPosition()
-    #         plt.scatter(xPos,yPos,marker = '2',color='m') 
-    #     #plt(x_nodes[find(node_status,1,"l")],y_nodes[find(node_status,1,"l")],linestyle='o') 
-    #     #plt(x_radiation_points,y_radiation_points,linestyle,'o') 
-    #     #plt(x_nodes[find(node_status,0,"g")],y_nodes[find(node_status,0,"g")],linestyle='x') 
-    #     plt.show(block = False)
-    #     plt.pause(0.001)
+            # perform dvhop starting with beacon nodes
+            for SendNode in NodeList:
+                hopCount = 0
 
+                # check if node is beacon
+                if SendNode.getBeacon() and not SendNode.getDead():
+                    beaconName     = SendNode.getName()
+                    beaconPosition = SendNode.getPosition()
+                    # send hop message to all nodes in network
+                    for ReceiveNode in NodeList:
+                        if not ReceiveNode.getDead():
+                            if SendNode.getName() == ReceiveNode.getName():
+                                continue
+                            else:
+                                # send message to all nodes in network
+                                if NodeInRange(SendNode, ReceiveNode):
+                                    hopCount += 1
+                                    SendNode.sendHopMessage(ReceiveNode, beaconName, beaconPosition, hopCount)
+                                    SendNode = ReceiveNode
+
+            plt.cla()
+            for node in NodeList:
+                xPos,yPos = node.getPosition()
+                if node.getDead():
+                    sym = 'x'
+                    color = 'k'
+                elif node.getBeacon():
+                    sym = '*'
+                    color = 'b'
+                else:
+                    sym = 'o'
+                    color = 'g'
+                plt.scatter(xPos,yPos,marker = sym,color=color)
+            for contam in contaminationList:
+                xPos,yPos = contam.getPosition()
+                plt.scatter(xPos,yPos,marker = '2',color='m')
+            plt.show()#(block = False)
+            #plt.pause(0.001)
